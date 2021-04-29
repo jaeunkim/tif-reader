@@ -51,7 +51,6 @@ class TifReader(QtWidgets.QWidget, Ui_Form):
         
         # Setup: loader thread
         self.my_thread = LoaderThread(self)
-        self.tif_arr = self.my_thread.tif_arr
         self.files_to_load.connect(self.my_thread.loader)
         self.my_thread.loaded_data.connect(self.update_data)
     
@@ -155,36 +154,37 @@ class TifReader(QtWidgets.QWidget, Ui_Form):
             # except:
             #     stacked_data = file_content
             #     print("except: ", np.shape(stacked_data))
+            
     def imageUpdate(self, recv_data):
         pass
         
 class LoaderThread(QThread):
-    loaded_data = pyqtSignal(np.ndarray)
+    file_loaded = pyqtSignal(int, int)
     
     def __init__(self, reader):
         super().__init__()
-        self.tif_arr = []
         self.reader = reader
     
     def load_tif_as_np(self, tif_file):
         im = Image.open(tif_file)
         im_arr = []
         for im_slice in ImageSequence.Iterator(im):
-            im_arr.append(np.array(im_slice))  #.T?
+            im_arr.append(np.array(im_slice).T)
         return np.array(im_arr)
     
     def loader(self, tif_list):
-        for tif_file in tif_list:
+        for idx, tif_file in enumerate(tif_list):
             # TODO: if tif img dimensions are different: raggedarray
             file_content = self.load_tif_as_np(tif_file)
             print("file_content shape: ", np.shape(file_content))
-            loaded_data.emit(file_content)
-            # try:
-            #     stacked_data = np.append(stacked_data, file_content, axis=0)
-            #     print("try: ", np.shape(stacked_data))
-            # except:
-            #     stacked_data = file_content
-            #     print("except: ", np.shape(stacked_data))
+            # loaded_data.emit(file_content)
+            try:
+                self.reader.data_as_np = np.append(self.reader.data_as_np, file_content, axis=0)
+                print("try: ", np.shape(self.reader.data_as_np))
+            except:
+                self.reader.data_as_np = file_content
+                print("except: ", np.shape(self.reader.data_as_np))
+            self.file_loaded.emit(idx, len(tif_list))
     
 
 if __name__ == "__main__":

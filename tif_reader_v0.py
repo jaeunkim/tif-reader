@@ -17,6 +17,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 
 from PIL import Image, ImageSequence
 from glob import glob
+import time
 
 filename = os.path.abspath(__file__)
 dirname = os.path.dirname(filename)
@@ -39,21 +40,28 @@ class TifReader(QtWidgets.QWidget, Ui_Form):
         self.load_file_btn.clicked.connect(self.load_file)
         self.load_dir_btn.clicked.connect(self.load_dir)
         self.save_btn.clicked.connect(self.save_file)
+        self.clear_data_btn.clicked.connect(self.clear_data)
         
         # Internal 
         self.data_as_np = None
         self.curr_dir = ""
-        self.curr_files = []
-        self.curr_idx = -1
-        self.start_idx = -1
+        self.tif_files = []
+        self.curr_idx = 0
+        self.start_idx = 0
         self.end_idx = -1
-        self.step_size = -1
+        self.step_size = 1
         
         # Setup: loader thread
-        self.my_thread = LoaderThread(self)
-        self.files_to_load.connect(self.my_thread.loader)
-        self.my_thread.loaded_data.connect(self.update_data)
+        self.loader_thread = LoaderThread(self)
+        self.files_to_load.connect(self.loader_thread.loader)
+        # self.my_thread.loaded_data.connect(self.update_data)
     
+    def clear_data(self):
+        #TODO check if this actually releases memory
+        self.loader_thread.running_flag = False
+        self.data_as_np = None
+        #TODO clear file list label
+        
     def enable_viewers(self, flag):
         #TODO iterate with getattr
         self.image_viewer.setEnabled(flag)
@@ -63,25 +71,35 @@ class TifReader(QtWidgets.QWidget, Ui_Form):
         self.viewer_options.setEnabled(flag)
         self.load_dir_btn.setEnabled(flag)
         self.load_file_btn.setEnabled(flag)
+        self.clear_data_btn.setEnabled(flag)
         self.save_btn.setEnabled(flag)
+    
+        # "cancel loading" button behaves differently
+        self.cancel_loading_btn(not flag)
+        
+    def show_img(self):            
+        self.ax.imshow(self.data_as_np[self.curr_idx], vmin=self.vmin, vmax=self.vmax)
+        self.canvas.draw()
 
     def load_file(self):
+        # dialog to choose file
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        load_path, _ = QFileDialog.getOpenFileName(self,"load a .tif file", "",".tif Files(*.tif)", options=options)
-        if not load_path:
+        file_to_load, _ = QFileDialog.getOpenFileName(self,"load a .tif file", "",".tif Files(*.tif)", options=options)
+        if not file_to_load:
             return  # user pressed "cancel"
-        print(load_path)
+        print(file_to_load)
         
-        # start loading
+        # update info and initiate load
+        self.tif_files.append(file_to_load)
+        self.curr_dir = os.path.dirname(file_to_load)
+        self.curr_dir_label.setText(self.curr_dir)
         self.enable_viewers(False)
-        self.files_to_load.emit(list(load_path))
-        # self.data_as_np = self.load_tif_as_np(load_path)
-        self.curr_dir = os.path.dirname(load_path)
-        print(curr_dir)
-        self.curr_files = [load_path]
-        self.curr_idx = 0
-        self.start_idx = 0
+        self.files_to_load.emit(list(file_to_load))
+        #TODO get signal from thread
+        self.tif_files.append(file_to_load)
+        self.loader_thread.loader([load_path])
+
         self.end_idx = np.shape(self.data_as_np)[0] - 1
         self.step_size = 1
         self.enable_viewers(True)
@@ -93,22 +111,22 @@ class TifReader(QtWidgets.QWidget, Ui_Form):
             return  # user pressed "cancel"
         
         print(load_path)
-        tif_list = glob(load_path + "/" + "*.tif")
-        print(tif_list)
+        tif_files = glob(load_path + "/" + "*.tif")
+        print(tif_files)
         
         # return if this dir does not contain .tif files
-        if not tif_list:
+        if not tif_files:
             error_dialog = QErrorMessage()
             error_dialog.showMessage('this directory does not contain .tif files')
             return
             
-        self.curr_dir = load_path
-        self.curr_files = tif_list
+        #self.curr_dir = load_path
+        #self.tif_files = tif_files
         
-        stacked_data = np.array([])
+        self.loader_thread.tif_files.append(tif_files)        
+        self.loader_thread.loader(self.tif_files)
+
         
-        
-        self.data_as_np = stacked_data
         self.curr_idx = 0
         self.start_idx = 0
         self.end_idx = np.shape(self.data_as_np)[0] - 1
@@ -157,16 +175,35 @@ class TifReader(QtWidgets.QWidget, Ui_Form):
             
     def imageUpdate(self, recv_data):
         pass
+    
+    def th_test(self):
+        self.loader_thread.running_flag = True
+        self.loader_thread.start()
+        
         
 class LoaderThread(QThread):
     file_loaded = pyqtSignal(int, int)
+    done_loading = pyqtSignal(int)
     
     def __init__(self, reader):
         super().__init__()
         self.reader = reader
+        self.running_flag = False
+                
+        ## TIF files handling
+        self.tif_files = []
+        self.loading_idx = 0
+        
+    def run(self):
+        self.currently_loading_file_idx = 0
+        while (self.running_flag and (self.loading_idx <= len(self.tif_files))):
+            self.reader.LBL_Log.setText("Loading... File: %02d/%02d"
+                                        % (self.loading_idx, len(self.tif_files)))
+            self.load_tif_as_np(self.loading_idx)
+            self.loading_idx += 1
     
-    def load_tif_as_np(self, tif_file):
-        im = Image.open(tif_file)
+    def load_tif_as_np(self, idx):
+        im = Image.open(self.tif_files[idx])
         im_arr = []
         for im_slice in ImageSequence.Iterator(im):
             im_arr.append(np.array(im_slice).T)

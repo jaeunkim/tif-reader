@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>902</width>
-    <height>754</height>
+    <width>905</width>
+    <height>757</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,7 +54,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
-           <widget class="QScrollBar" name="horizontalScrollBar">
+           <widget class="QScrollBar" name="idx_scroll">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -69,7 +69,7 @@
              <number>30</number>
             </property>
             <item row="1" column="0">
-             <widget class="QLineEdit" name="start_idx"/>
+             <widget class="QLineEdit" name="start_idx_ledit"/>
             </item>
             <item row="0" column="2">
              <widget class="QLabel" name="label_3">
@@ -93,10 +93,10 @@
              </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QLineEdit" name="end_idx"/>
+             <widget class="QLineEdit" name="end_idx_ledit"/>
             </item>
             <item row="1" column="1">
-             <widget class="QLineEdit" name="step_size"/>
+             <widget class="QLineEdit" name="step_size_ledit"/>
             </item>
            </layout>
           </item>
@@ -107,46 +107,96 @@
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,1,1,3,1,2">
       <item>
-       <widget class="QLabel" name="curr_dir_label">
-        <property name="text">
-         <string>TextLabel</string>
+       <widget class="QGroupBox" name="log_gbox">
+        <property name="title">
+         <string>Log</string>
         </property>
+        <widget class="QTextBrowser" name="log_label">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>241</width>
+           <height>51</height>
+          </rect>
+         </property>
+        </widget>
        </widget>
       </item>
       <item>
-       <widget class="QTableView" name="curr_files_table">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>300</height>
-         </size>
+       <widget class="QGroupBox" name="curr_dir_gbox">
+        <property name="title">
+         <string>Current Directory</string>
         </property>
+        <widget class="QLabel" name="curr_dir_label">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>241</width>
+           <height>51</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="cancel_loading_btn">
-        <property name="enabled">
-         <bool>false</bool>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Current Index</string>
         </property>
-        <property name="text">
-         <string>Cancel Loading</string>
-        </property>
+        <widget class="QLabel" name="curr_idx_label">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>241</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>18</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="log_lbl">
-        <property name="text">
-         <string>TextLabel</string>
+       <widget class="QGroupBox" name="curr_files_gbox">
+        <property name="title">
+         <string>Currently Loaded Files</string>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="curr_idx_label">
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
+        <widget class="QTableWidget" name="curr_files_table">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>241</width>
+           <height>201</height>
+          </rect>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAsNeeded</enum>
+         </property>
+        </widget>
        </widget>
       </item>
       <item>
@@ -158,9 +208,9 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>10</y>
+           <y>20</y>
            <width>241</width>
-           <height>61</height>
+           <height>51</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -186,32 +236,46 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="load_file_btn">
-        <property name="text">
-         <string>Load File</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="load_dir_btn">
-        <property name="text">
-         <string>Load Directory</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="clear_data_btn">
-        <property name="text">
-         <string>Clear Data</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="save_btn">
-        <property name="text">
-         <string>Save</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QPushButton" name="clear_data_btn">
+          <property name="text">
+           <string>Clear Data</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="cancel_loading_btn">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Cancel Loading</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="load_file_btn">
+          <property name="text">
+           <string>Load File</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="load_dir_btn">
+          <property name="text">
+           <string>Load Directory</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="save_btn">
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -219,5 +283,107 @@
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>idx_scroll</sender>
+   <signal>actionTriggered(int)</signal>
+   <receiver>Form</receiver>
+   <slot>scrolled()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>614</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>638</x>
+     <y>750</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>flip_horizontally_cbox</sender>
+   <signal>clicked()</signal>
+   <receiver>Form</receiver>
+   <slot>show_img()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>536</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>925</x>
+     <y>535</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>flip_vertically_cbox</sender>
+   <signal>clicked()</signal>
+   <receiver>Form</receiver>
+   <slot>show_img()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>697</x>
+     <y>556</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>913</x>
+     <y>555</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>start_idx_ledit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>Form</receiver>
+   <slot>adjust_idx_range()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>192</x>
+     <y>724</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>189</x>
+     <y>768</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>step_size_ledit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>Form</receiver>
+   <slot>adjust_idx_range()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>724</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>328</x>
+     <y>778</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>end_idx_ledit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>Form</receiver>
+   <slot>adjust_idx_range()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>485</x>
+     <y>720</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>492</x>
+     <y>766</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>scrolled()</slot>
+  <slot>show_img()</slot>
+  <slot>adjust_idx_range()</slot>
+ </slots>
 </ui>
